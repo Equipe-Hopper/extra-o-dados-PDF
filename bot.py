@@ -1,6 +1,6 @@
 from modules.email import Email
 from modules.pdf import Pdf
-from botcity.web import WebBot, Browser, By
+from botcity.web import WebBot
 from botcity.maestro import *
 
 BotMaestroSDK.RAISE_NOT_CONNECTED = False
@@ -24,8 +24,8 @@ class Bot(WebBot):
 
             # Executar a extração e envio de e-mail
             email = Email()
-            pdf = Pdf()
-            output_file = pdf.extract_phone_numbers('resources\Telefone.pdf')
+            pdf = Pdf('resources\Telefone.pdf')
+            output_file = pdf.extract_phone_numbers()
             if output_file is not None:
                 email.send_email_with_attachment(output_file)
 
