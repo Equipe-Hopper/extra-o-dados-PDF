@@ -26,9 +26,23 @@ class Bot(WebBot):
             email = Email()
             pdf = Pdf('resources\Telefone.pdf')
             output_file = pdf.extract_phone_numbers()
+            maestro.alert(
+                task_id=execution.task_id,
+                title="Extraindo Informaçoes",
+                message="A automaçao esta extraindo informaçoes...",
+                alert_type=AlertType.INFO
+            )
             if output_file is not None:
+
+                maestro.post_artifact(
+                    task_id=execution.task_id,
+                    artifact_name="Telefones Extraidos",
+                    filepath=r"resources\telefones_extraidos.xlsx"
+                )
+                
                 email.send_email_with_attachment(output_file)
 
+                   
             finshed_status = AutomationTaskFinishStatus.SUCCESS
 
             finish_message = "Tarefa finalizada com sucesso"
@@ -42,12 +56,6 @@ class Bot(WebBot):
         
         finally:
             self.wait(3000)
-            # maestro.alert(
-            #     task_id= execution.task_id,
-            #     title= "Finalizou automação",
-            #     message= "This is an info alert",
-            #     alert_type= AlertType.INFO
-            # )
             maestro.finish_task(
                 task_id=execution.task_id,
                 status=finshed_status,
