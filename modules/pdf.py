@@ -4,10 +4,12 @@ import re
 import openpyxl
 
 class Pdf:
+
     def __init__(self,pdf_path):
         self.pdf_path = pdf_path
         pass
 
+    
     def extract_phone_numbers(self):
         all_text = ""
         
