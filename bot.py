@@ -2,6 +2,7 @@ from modules.email import Email
 from modules.pdf import Pdf
 from botcity.web import WebBot
 from botcity.maestro import *
+from modules.maestro import MaestroAlerts
 
 BotMaestroSDK.RAISE_NOT_CONNECTED = False
 
@@ -11,34 +12,27 @@ class Bot(WebBot):
         maestro = BotMaestroSDK.from_sys_args()
         execution = maestro.get_execution()
 
+        
         print(f"Task ID is: {execution.task_id}")
         print(f"Task Parameters are: {execution.parameters}")
 
+        maestro_actions= MaestroAlerts(maestro,execution.task_id)
+
         try:
-            maestro.alert(
-                task_id=execution.task_id,
-                title="Iniciando automação",
-                message="A automaçao foi iniciada...",
-                alert_type=AlertType.INFO
-            )
+
+            maestro_actions.alert_info(titulo="Iniciando automação",mensagem="A automaçao foi iniciada...")
 
             # Executar a extração e envio de e-mail
             email = Email()
             pdf = Pdf('resources\Telefone.pdf')
             output_file = pdf.extract_phone_numbers()
-            maestro.alert(
-                task_id=execution.task_id,
-                title="Extraindo Informaçoes",
-                message="A automaçao esta extraindo informaçoes...",
-                alert_type=AlertType.INFO
-            )
+          
+            maestro_actions.alert_info(titulo="Extraindo Informaçoes",mensagem="A automaçao esta extraindo informaçoes...")
+
             if output_file is not None:
 
-                maestro.post_artifact(
-                    task_id=execution.task_id,
-                    artifact_name="Telefones Extraidos",
-                    filepath=r"resources\telefones_extraidos.xlsx"
-                )
+              
+                maestro_actions.post_artifact(nome_artefato="Telefones Extraidos",caminho_arq="resources/telefones_extraidos.xlsx")
                 
                 email.send_email_with_attachment(output_file)
 
@@ -46,12 +40,8 @@ class Bot(WebBot):
             finshed_status = AutomationTaskFinishStatus.SUCCESS
 
             finish_message = "Tarefa finalizada com sucesso"
-            maestro.alert(
-                task_id=execution.task_id,
-                title="Tarefa finalizada com sucesso",
-                message="Tarefa finalizada com sucesso...",
-                alert_type=AlertType.SUCCESS
-            )
+          
+            maestro_actions.alert_success(titulo="Tarefa finalizada com sucesso",mensagem="Tarefa finalizada com sucesso..")
 
         except Exception as ex:
             print("Error: ", ex)
@@ -60,21 +50,12 @@ class Bot(WebBot):
             finshed_status = AutomationTaskFinishStatus.FAILED
             finish_message = "Tarefa finalizada com erro"
 
-            maestro.alert(
-                task_id=execution.task_id,
-                title="Tarefa finalizada com ERRO",
-                message="Tarefa finalizada com ERRO...",
-                alert_type=AlertType.ERROR
-            )
+            maestro_actions.alert_error(titulo="Tarefa finalizada com ERRO",mensagem="Tarefa finalizada com ERRO...")
 
         
         finally:
             self.wait(3000)
-            maestro.finish_task(
-                task_id=execution.task_id,
-                status=finshed_status,
-                message=finish_message
-            )
+            maestro_actions.finish_task(finshed_status=finshed_status,finish_message=finish_message)
 
     def not_found(self, label):
         print(f"Element not found: {label}")
