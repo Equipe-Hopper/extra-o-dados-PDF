@@ -46,6 +46,12 @@ class Bot(WebBot):
             finshed_status = AutomationTaskFinishStatus.SUCCESS
 
             finish_message = "Tarefa finalizada com sucesso"
+            maestro.alert(
+                task_id=execution.task_id,
+                title="Tarefa finalizada com sucesso",
+                message="Tarefa finalizada com sucesso...",
+                alert_type=AlertType.SUCCESS
+            )
 
         except Exception as ex:
             print("Error: ", ex)
@@ -53,6 +59,14 @@ class Bot(WebBot):
 
             finshed_status = AutomationTaskFinishStatus.FAILED
             finish_message = "Tarefa finalizada com erro"
+
+            maestro.alert(
+                task_id=execution.task_id,
+                title="Tarefa finalizada com ERRO",
+                message="Tarefa finalizada com ERRO...",
+                alert_type=AlertType.ERROR
+            )
+
         
         finally:
             self.wait(3000)
