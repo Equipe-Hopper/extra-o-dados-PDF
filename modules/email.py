@@ -5,7 +5,9 @@ import os
 load_dotenv()
 
 class Email:
-    def send_email_with_attachment(file_path)->None:
+    def __init__(self):
+        pass
+    def send_email_with_attachment(self,file_path)->None:
         email = BotEmailPlugin()
 
         # Configurar IMAP e SMTP com o servidor Gmail
