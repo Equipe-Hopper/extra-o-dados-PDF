@@ -1,69 +1,64 @@
-from PyPDF2 import PdfReader  
-import pdfplumber
-import pandas as pd
-import os
-import re
-from openpyxl import load_workbook
-from openpyxl.styles import Alignment
-from botcity.plugins.email import BotEmailPlugin
-from dotenv import load_dotenv
+from modules.email import Email
+from modules.pdf import Pdf
+from botcity.web import WebBot
+from botcity.maestro import *
+from modules.maestro import MaestroAlerts
 
-load_dotenv()
+BotMaestroSDK.RAISE_NOT_CONNECTED = False
 
-def extract_phone_numbers(pdf_path):
-    all_text = ""
-    
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                all_text += page_text
+class Bot(WebBot):
 
-    text = all_text.strip()
+    def action(self=None,execution=None):
+        maestro = BotMaestroSDK.from_sys_args()
+        execution = maestro.get_execution()
 
-    # Regex para encontrar números de telefone
-    phone_pattern = re.compile(r'\(\d{2}\)\s*\d{5}-\d{4}|\(\d{2}\)\s*\d{4}-\d{4}')
-    phones = phone_pattern.findall(text)
+        
+        print(f"Task ID is: {execution.task_id}")
+        print(f"Task Parameters are: {execution.parameters}")
 
-    if not phones:
-        print("Nenhum número de telefone encontrado.")
-        return None
+        maestro_actions= MaestroAlerts(maestro,execution.task_id)
 
-    # Remover duplicatas
-    unique_phones = list(set(phones))
+        try:
 
-    # Criar DataFrame
-    df = pd.DataFrame(unique_phones, columns=['Telefone'])
+            maestro_actions.alert_info(titulo="Iniciando automação",mensagem="A automaçao foi iniciada...")
 
-    # Salvar DataFrame em Excel
-    output_file = 'telefones_extraidos.xlsx'
-    df.to_excel(output_file, index=False)
-    print(f'Números de telefone extraídos e salvos em: {output_file}')
+            # Executar a extração e envio de e-mail
+            email = Email()
+            pdf = Pdf('resources\Telefone.pdf')
+            output_file = pdf.extract_phone_numbers()
+          
+            maestro_actions.alert_info(titulo="Extraindo Informaçoes",mensagem="A automaçao esta extraindo informaçoes...")
 
-    return output_file
+            if output_file is not None:
 
-def send_email_with_attachment(file_path):
-    email = BotEmailPlugin()
+              
+                maestro_actions.post_artifact(nome_artefato="Telefones Extraidos",caminho_arq="resources/telefones_extraidos.xlsx")
+                
+                email.send_email_with_attachment(output_file)
 
-    # Configurar IMAP e SMTP com o servidor Gmail
-    email.configure_imap("imap.gmail.com", 993)
-    email.configure_smtp("smtp.gmail.com", 587)
+                   
+            finshed_status = AutomationTaskFinishStatus.SUCCESS
 
-    email.login(os.getenv("USER"), os.getenv("SENHA"))  # Substitua pelos seus dados
+            finish_message = "Tarefa finalizada com sucesso"
+          
+            maestro_actions.alert_success(titulo="Tarefa finalizada com sucesso",mensagem="Tarefa finalizada com sucesso..")
 
-    # Definir os atributos da mensagem
-    to = ["francisco.alberto@ifam.edu.br"]  
-    subject = "Arquivo Excel Gerado"
-    body = "<h1>Olá!</h1> Arquivo de envio automático."
-    files = [file_path]
+        except Exception as ex:
+            print("Error: ", ex)
+            self.save_screenshot("resources/erro.png")
 
-    # Enviar a mensagem de e-mail
-    email.send_message(subject, body, to, attachments=files, use_html=True)
+            finshed_status = AutomationTaskFinishStatus.FAILED
+            finish_message = "Tarefa finalizada com erro"
 
-    # Fechar a conexão com os servidores IMAP e SMTP
-    email.disconnect()
+            maestro_actions.alert_error(titulo="Tarefa finalizada com ERRO",mensagem="Tarefa finalizada com ERRO...")
 
-# Executar a extração e envio de e-mail
-output_file = extract_phone_numbers('Telefone.pdf')
-if output_file is not None:
-    send_email_with_attachment(output_file)
+        
+        finally:
+            self.wait(3000)
+            maestro_actions.finish_task(finshed_status=finshed_status,finish_message=finish_message)
+
+    def not_found(self, label):
+        print(f"Element not found: {label}")
+
+if __name__ == "__main__":
+    Bot.main()
