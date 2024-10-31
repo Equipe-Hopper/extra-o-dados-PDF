@@ -1,13 +1,17 @@
-from PyPDF2 import PdfReader  
 import pdfplumber
 import pandas as pd
 import re
+import openpyxl
 
 class Pdf:
-    def extract_phone_numbers(pdf_path):
+    def __init__(self,pdf_path):
+        self.pdf_path = pdf_path
+        pass
+
+    def extract_phone_numbers(self):
         all_text = ""
         
-        with pdfplumber.open(pdf_path) as pdf:
+        with pdfplumber.open(self.pdf_path) as pdf:
             for page in pdf.pages:
                 page_text = page.extract_text()
                 if page_text:
@@ -30,7 +34,7 @@ class Pdf:
         df = pd.DataFrame(unique_phones, columns=['Telefone'])
 
         # Salvar DataFrame em Excel
-        output_file = 'telefones_extraidos.xlsx'
+        output_file = 'resources/telefones_extraidos.xlsx'
         df.to_excel(output_file, index=False)
         print(f'Números de telefone extraídos e salvos em: {output_file}')
 
