@@ -2,7 +2,7 @@
 
 # VSCode IDE files
 .vscode
-
+extrair-dados-PDF-df2.zip
 # PyCharm IDE files
 .idea
 
@@ -11,6 +11,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+resources/erro.png
+resources/telefones_extraidos.xlsx
 # C extensions
 *.so
 
