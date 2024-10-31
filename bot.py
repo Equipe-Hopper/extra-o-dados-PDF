@@ -1,69 +1,61 @@
-from PyPDF2 import PdfReader  
-import pdfplumber
-import pandas as pd
-import os
-import re
-from openpyxl import load_workbook
-from openpyxl.styles import Alignment
-from botcity.plugins.email import BotEmailPlugin
-from dotenv import load_dotenv
+from modules.email import Email
+from modules.pdf import Pdf
+from botcity.web import WebBot, Browser, By
+from botcity.maestro import *
 
-load_dotenv()
+BotMaestroSDK.RAISE_NOT_CONNECTED = False
 
-def extract_phone_numbers(pdf_path):
-    all_text = ""
-    
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                all_text += page_text
+class Bot(WebBot):
 
-    text = all_text.strip()
+    def action(self=None,execution=None):
+        maestro = BotMaestroSDK.from_sys_args()
+        execution = maestro.get_execution()
 
-    # Regex para encontrar números de telefone
-    phone_pattern = re.compile(r'\(\d{2}\)\s*\d{5}-\d{4}|\(\d{2}\)\s*\d{4}-\d{4}')
-    phones = phone_pattern.findall(text)
+        print(f"Task ID is: {execution.task_id}")
+        print(f"Task Parameters are: {execution.parameters}")
 
-    if not phones:
-        print("Nenhum número de telefone encontrado.")
-        return None
+        try:
+            maestro.alert(
+                task_id=execution.task_id,
+                title="Iniciando automação",
+                message="A automaçao foi iniciada...",
+                alert_type=AlertType.INFO
+            )
 
-    # Remover duplicatas
-    unique_phones = list(set(phones))
+            # Executar a extração e envio de e-mail
+            email = Email()
+            pdf = Pdf()
+            output_file = pdf.extract_phone_numbers('resources\Telefone.pdf')
+            if output_file is not None:
+                email.send_email_with_attachment(output_file)
 
-    # Criar DataFrame
-    df = pd.DataFrame(unique_phones, columns=['Telefone'])
+            finshed_status = AutomationTaskFinishStatus.SUCCESS
 
-    # Salvar DataFrame em Excel
-    output_file = 'telefones_extraidos.xlsx'
-    df.to_excel(output_file, index=False)
-    print(f'Números de telefone extraídos e salvos em: {output_file}')
+            finish_message = "Tarefa finalizada com sucesso"
 
-    return output_file
+        except Exception as ex:
+            print("Error: ", ex)
+            self.save_screenshot("resources/erro.png")
 
-def send_email_with_attachment(file_path):
-    email = BotEmailPlugin()
+            finshed_status = AutomationTaskFinishStatus.FAILED
+            finish_message = "Tarefa finalizada com erro"
+        
+        finally:
+            self.wait(3000)
+            # maestro.alert(
+            #     task_id= execution.task_id,
+            #     title= "Finalizou automação",
+            #     message= "This is an info alert",
+            #     alert_type= AlertType.INFO
+            # )
+            maestro.finish_task(
+                task_id=execution.task_id,
+                status=finshed_status,
+                message=finish_message
+            )
 
-    # Configurar IMAP e SMTP com o servidor Gmail
-    email.configure_imap("imap.gmail.com", 993)
-    email.configure_smtp("smtp.gmail.com", 587)
+    def not_found(self, label):
+        print(f"Element not found: {label}")
 
-    email.login(os.getenv("USER"), os.getenv("SENHA"))  # Substitua pelos seus dados
-
-    # Definir os atributos da mensagem
-    to = ["francisco.alberto@ifam.edu.br"]  
-    subject = "Arquivo Excel Gerado"
-    body = "<h1>Olá!</h1> Arquivo de envio automático."
-    files = [file_path]
-
-    # Enviar a mensagem de e-mail
-    email.send_message(subject, body, to, attachments=files, use_html=True)
-
-    # Fechar a conexão com os servidores IMAP e SMTP
-    email.disconnect()
-
-# Executar a extração e envio de e-mail
-output_file = extract_phone_numbers('Telefone.pdf')
-if output_file is not None:
-    send_email_with_attachment(output_file)
+if __name__ == "__main__":
+    Bot.main()
