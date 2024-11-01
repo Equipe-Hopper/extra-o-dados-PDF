@@ -1,4 +1,4 @@
-from modules.email import Email
+from modules.email_utils import Email
 from modules.pdf import Pdf
 from botcity.web import WebBot
 from botcity.maestro import *
@@ -32,7 +32,7 @@ class Bot(WebBot):
             if output_file is not None:
 
               
-                maestro_actions.post_artifact(nome_artefato="Telefones Extraidos",caminho_arq="resources/telefones_extraidos.xlsx")
+                # maestro_actions.post_artifact(nome_artefato="Telefones Extraidos",caminho_arq="resources/telefones_extraidos.xlsx")
                 
                 email.send_email_with_attachment(output_file)
 
