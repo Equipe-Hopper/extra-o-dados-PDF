@@ -9,7 +9,7 @@ Este projeto utiliza o framework da **BotCity** para automatizar a extração de
 - **Alertas e Notificações**: Utiliza o módulo `MaestroAlerts` para enviar notificações sobre o andamento da automação.
 
 ## Estrutura do Projeto
-
+```bash
 ├── modules/
 │ ├── email.py # Módulo para envio de e-mails
 │ ├── pdf.py # Módulo para extração de informações de PDFs
@@ -18,7 +18,7 @@ Este projeto utiliza o framework da **BotCity** para automatizar a extração de
 └── resources/
 ├── Telefone.pdf # Arquivo PDF a ser processado
 └── telefones_extraidos.xlsx # Resultado da extração
-
+```
 
 
 ## Pré-requisitos
