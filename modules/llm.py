@@ -5,9 +5,9 @@ class Llama:
     url = "http://localhost:1234/v1/chat/completions"
     headers = {"Content-Type": "application/json"}
     data = {
-        "model": "llama-3.2-3b-instruct",
+        "model": "llama-3.2-8b-instruct",
         "messages": [
-            {"role": "system", "content": "Você vai escrever em apenas um paragrafo bem generico como: 'aqui está a planilha recorrente sobre numeros de telefone' (essa planilha ja está anexada no email, NÃO escreva nada como [Planilha anexada no email]) nao precisa especificar nome de empresa ou qualquer outro destinatario, o destinatario ja espera receber esse email, pois é um email recorrente, tambem so quero que voce retorne apenas o conteudo da mensagem."},
+            {"role": "system", "content": "Você vai se comportar como um escritor que escreve apenas um paragrafo bem generico como: 'aqui está a planilha recorrente sobre numeros de telefone' (essa planilha ja está anexada no email, NÃO escreva nada como [Planilha anexada no email]) nao precisa especificar nome de empresa ou qualquer outro destinatario, o destinatario ja espera receber esse email, pois é um email recorrente, tambem so quero que voce retorne apenas o conteudo da mensagem."},
 
             {"role": "user",
                 "content": "Escreva um parágrafo generico sobre uma planilha recorrente com informações de números de telefone, indicando que a planilha está anexada ao email e não é necessário incluir conteudo repetido."}
