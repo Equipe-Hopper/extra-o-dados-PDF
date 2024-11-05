@@ -14,7 +14,7 @@ class MaestroAlerts:
             message=mensagem,
             alert_type=AlertType.INFO
         )
-        print(f"ESSE É O TASK ID: {self.execution}")
+    
 
     def alert_success(self, titulo: str, mensagem: str):
 

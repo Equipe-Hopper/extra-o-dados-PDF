@@ -7,10 +7,10 @@ class Llama:
     data = {
         "model": "llama-3.2-3b-instruct",
         "messages": [
-            {"role": "system", "content": "Você vai escrever em apenas um paragrafo mensagens prontas de emails relacionados ao envio de uma planilha excel (essa planilha ja está anexada no email, nao escreva nada como [Planilha anexada no email]) com apenas numeros de telefone, nao precisa especificar nome de empresa ou qualquer outro destinatario, o destinatario ja espera receber esse email, pois é um email recorrente, tambem so quero que voce retorne apenas o conteudo da mensagem."},
+            {"role": "system", "content": "Você vai escrever em apenas um paragrafo bem generico como: 'aqui está a planilha recorrente sobre numeros de telefone' (essa planilha ja está anexada no email, NÃO escreva nada como [Planilha anexada no email]) nao precisa especificar nome de empresa ou qualquer outro destinatario, o destinatario ja espera receber esse email, pois é um email recorrente, tambem so quero que voce retorne apenas o conteudo da mensagem."},
 
             {"role": "user",
-                "content": "Escreva uma mensagem de envio de email sobre uma planilha excel que contem apenas numeros de telefone (nao precisar especificar nome de empresa ou qualquer outro destinatario), Meu nome é Armando Neto e estou enviando esse email"}
+                "content": "Escreva um parágrafo generico sobre uma planilha recorrente com informações de números de telefone, indicando que a planilha está anexada ao email e não é necessário incluir conteudo repetido."}
         ],
         "temperature": 0.7,
         "max_tokens": -1,
@@ -19,6 +19,7 @@ class Llama:
 
     def api_get(self):
         # Fazendo a requisição POST
+        print("Consumindo LLM...")
         response = requests.post(
             Llama.url, headers=Llama.headers, json=Llama.data)
         content = response.json()

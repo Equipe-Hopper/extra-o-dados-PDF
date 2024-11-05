@@ -20,14 +20,14 @@ class Bot(WebBot):
 
         try:
 
-            maestro_actions.alert_info(titulo="Iniciando automação",mensagem="A automaçao foi iniciada...")
+            # maestro_actions.alert_info(titulo="Iniciando automação",mensagem="A automaçao foi iniciada...")
 
             # Executar a extração e envio de e-mail
             email = Email()
             pdf = Pdf('resources\Telefone.pdf')
             output_file = pdf.extract_phone_numbers()
           
-            maestro_actions.alert_info(titulo="Extraindo Informaçoes",mensagem="A automaçao esta extraindo informaçoes...")
+            # maestro_actions.alert_info(titulo="Extraindo Informaçoes",mensagem="A automaçao esta extraindo informaçoes...")
 
             if output_file is not None:
 
@@ -41,7 +41,7 @@ class Bot(WebBot):
 
             finish_message = "Tarefa finalizada com sucesso"
           
-            maestro_actions.alert_success(titulo="Tarefa finalizada com sucesso",mensagem="Tarefa finalizada com sucesso..")
+            # maestro_actions.alert_success(titulo="Tarefa finalizada com sucesso",mensagem="Tarefa finalizada com sucesso..")
 
         except Exception as ex:
             print("Error: ", ex)
@@ -50,12 +50,12 @@ class Bot(WebBot):
             finshed_status = AutomationTaskFinishStatus.FAILED
             finish_message = "Tarefa finalizada com erro"
 
-            maestro_actions.alert_error(titulo="Tarefa finalizada com ERRO",mensagem="Tarefa finalizada com ERRO...")
+            # maestro_actions.alert_error(titulo="Tarefa finalizada com ERRO",mensagem="Tarefa finalizada com ERRO...")
 
         
         finally:
             self.wait(3000)
-            maestro_actions.finish_task(finshed_status=finshed_status,finish_message=finish_message)
+            # maestro_actions.finish_task(finshed_status=finshed_status,finish_message=finish_message)
 
     def not_found(self, label):
         print(f"Element not found: {label}")

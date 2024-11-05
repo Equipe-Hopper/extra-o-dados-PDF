@@ -25,6 +25,7 @@ class Email:
         files = [file_path]
 
         # Enviar a mensagem de e-mail
+        print("Enviando email...")
         email.send_message(subject, body, to, attachments=files, use_html=True)
 
         # Fechar a conexão com os servidores IMAP e SMTP
